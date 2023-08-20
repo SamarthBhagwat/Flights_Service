@@ -1,17 +1,18 @@
 const { StatusCodes } = require('http-status-codes');
-const {AirplaneRepository} = require('../repositories');
+const {CityRepository} = require('../repositories');
 const AppError = require('../utils/error/app-error');
 
-const airplaneRepository = new AirplaneRepository();
+const cityRepository = new CityRepository();
 
-class AirplaneService {
+class CityService {
 
-    async createAirplane(airplaneData){
+    async createCity(cityData){
         try {
-            const airplane = await airplaneRepository.create(airplaneData);
-            return airplane;    
+            const city = await cityRepository.create(cityData);
+            return city;    
         } catch (error) {
-            if(error.name == 'SequelizeValidationError'){
+            console.log(error);
+            if(error.name == 'SequelizeValidationError' || error.name == 'SequelizeUniqueConstraintError'){
                 let error_array = error.errors;
                 let explanation = [];
                 error_array.forEach(element => {
@@ -27,10 +28,10 @@ class AirplaneService {
         }
     }
 
-    async getAirplanes(){
+    async getCities(){
         try {
-            const airplanes = await airplaneRepository.findAll();
-            return airplanes;    
+            const cities = await cityRepository.findAll();
+            return cities;    
         } catch (error) {
             const appError = new AppError("Internal Server error", StatusCodes.INTERNAL_SERVER_ERROR);
             throw appError;
@@ -38,14 +39,14 @@ class AirplaneService {
         
     }
 
-    async getAirplaneById(id){
+    async getCityById(id){
         try {
-            const airplane = await airplaneRepository.findById(id);
-            if(airplane){
-                return airplane;
+            const city = await cityRepository.findById(id);
+            if(city){
+                return city;
             }
             else{
-                const appError = new AppError(`Airplane with id ${id} not found` , StatusCodes.NOT_FOUND);
+                const appError = new AppError(`City with id ${id} not found` , StatusCodes.NOT_FOUND);
                 throw appError;
             }   
         } catch (error) {
@@ -60,17 +61,16 @@ class AirplaneService {
         
     }
 
-    async updateAirplane(id, updateData){
+    async updateCity(id, updateData){
         try {
-            const updateResponse = await airplaneRepository.update(id, updateData);    
+            const updateResponse = await cityRepository.update(id, updateData);    
             // Update response is an array containing 2 values : [affectedRowCount, metadataForUpdateOperation]
             if(updateResponse[0] > 0){
-                console.log("update response greater than 0");
-                const airplane = await airplaneRepository.findById(id);
-                return airplane;
+                const city = await cityRepository.findById(id);
+                return city;
             }
             else{
-                const appError = new AppError(`Airplane with id ${id} not found`, StatusCodes.BAD_REQUEST);
+                const appError = new AppError(`City with id ${id} not found`, StatusCodes.BAD_REQUEST);
                 throw appError;
             }
         } catch (error) {
@@ -95,17 +95,17 @@ class AirplaneService {
         
     }
 
-    async deleteAirplane(id){
-        const deleteResponse = await airplaneRepository.destroy(id);
+    async deleteCity(id){
+        const deleteResponse = await cityRepository.destroy(id);
         // Delete response will be the no.of rows deleted by destroy operation
         if(deleteResponse > 0){
-            return `Successfully deleted airplane with id ${id}`
+            return `Successfully deleted city with id ${id}`
         }
         else{
-            const appError = new AppError(`Airplane with id ${id} not found`, StatusCodes.NOT_FOUND);
+            const appError = new AppError(`City with id ${id} not found`, StatusCodes.NOT_FOUND);
             throw appError;
         }
     }
 }
 
-module.exports = AirplaneService;
+module.exports = CityService;

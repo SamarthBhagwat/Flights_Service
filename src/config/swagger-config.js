@@ -15,7 +15,7 @@ const options = {
             }
         ]
     },
-    apis: ['./src/routes/api/v1/airplane-router.js']
+    apis: ['./src/routes/api/v1/*.js']
 }
 
 const swaggerSpec = swaggerJsDoc(options);

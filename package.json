@@ -4,7 +4,7 @@
   "description": "This is a basic crud application to learn development from scratch",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/index.js"
+    "dev": "npx nodemon src/index.js"
   },
   "author": "Samarth Bhagwat",
   "license": "ISC",

@@ -1,7 +1,6 @@
 const AppError = require('../utils/error/app-error');
 const { StatusCodes } = require('http-status-codes')
 const { ErrorResponse } = require('../utils/response');
-const { error } = require('../utils/response/success-response');
 
 const validateCreateRequest = function(req, res, next){
     if(req.body.modelNumber && req.body.capacity){
