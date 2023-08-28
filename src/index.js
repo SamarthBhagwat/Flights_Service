@@ -29,10 +29,9 @@ app.use('/', routes);
 
 app.use('/api-docs', swaggerUiServe, swaggerUiSetup);
 
-app.listen(PORT, async function exec(){
+app.listen(PORT, function exec(){
     // console.log(`Server is up and running on port 3000`);
-    logger.info(`Server is up and running on port ${PORT}`);
-        
+    logger.info(`Server is up and running on port ${PORT}`);    
 });
 
 
