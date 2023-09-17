@@ -80,12 +80,18 @@ class AirportService {
                 throw appError;
             }
         } catch (error) {
+            console.log("Error in service", error.name);
             if(error.name == 'SequelizeValidationError'){
                 let error_array = error.errors;
                 let explanation = [];
                 error_array.forEach(element => {
                     explanation.push(element.message);
                 });
+                const appError = new AppError(explanation, StatusCodes.BAD_REQUEST);
+                throw appError;
+            }
+            else if(error.name == 'SequelizeForeignKeyConstraintError'){
+                let explanation = `${error.name}. Provided value of foreign key ${error.index} does not exist in table ${error.table} in columns ${error.fields}`
                 const appError = new AppError(explanation, StatusCodes.BAD_REQUEST);
                 throw appError;
             }
