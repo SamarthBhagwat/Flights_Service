@@ -62,4 +62,7 @@ router.post('/' ,
         flightController.createFlight);
 
 
+router.get('/', 
+        flightController.getAllFlights)
+
 module.exports = router;
