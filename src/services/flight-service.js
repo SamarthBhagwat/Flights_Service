@@ -1,8 +1,10 @@
 const { StatusCodes } = require('http-status-codes');
-const {FlightRepository} = require('../repositories');
+const {FlightRepository, AirportRepository} = require('../repositories');
 const AppError = require('../utils/error/app-error');
+const {Op} = require('sequelize');
 
 const flightRepository = new FlightRepository();
+const airportRepository = new AirportRepository();
 
 class FlightService {
 
@@ -36,6 +38,7 @@ class FlightService {
     async getAllFlights(query){
         // trips=MUM-DEL
         let customFilter = {};
+        let sortFilter = [];
         console.log(query);
         if(query.trips){
             let res = query.trips.split("-");
@@ -57,8 +60,49 @@ class FlightService {
             customFilter.arrivalAirportId = arrivalAirportId;
         }
 
+        // price=1000-4000
+        if(query.price){
+            let res = query.price.split("-");
+            if(res.length != 2 && res.length != 1){
+                let explanation = [];
+                explanation.push('Invalid value for query param price. Value should be in format minPrice-maxPrice only.');
+                let appError = new AppError(explanation, StatusCodes.BAD_REQUEST);
+                throw appError;
+            }
+            let minPrice = res[0];
+            let maxPrice = res[1];
+            console.log(minPrice, maxPrice);
+            if(!maxPrice){
+                maxPrice = 20000;
+            }
+            customFilter.price = {
+                [Op.between]: [minPrice, maxPrice]
+            }
+        }
+
+        // travellers=2
+        if(query.travellers){
+            customFilter.totalSeats = {
+                [Op.gte]: query.travellers
+            }
+        }
+
+        // date = '2023-08-16'
+        if(query.date){
+            customFilter.date = {
+                [Op.eq]: query.date
+            }
+        }
+
+        // sort = price_ACS,departureTime_DESC
+        if(query.sort){
+            const params = query.sort.split(',');
+            const sort = params.map((param) => param.split('_'));
+            sortFilter = sort;
+        }
+
         try {
-            const flights = await flightRepository.getAllFlights(customFilter);
+            const flights = await flightRepository.getAllFlights(customFilter, sortFilter);
             return flights;
         } catch (error) {
             throw new AppError('Cannot fetch data of all the airplanes.', StatusCodes.INTERNAL_SERVER_ERROR);
