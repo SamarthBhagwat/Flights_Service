@@ -77,6 +77,18 @@ const validateCreateRequest = function(req, res, next){
     next()
 }
 
+const validateUpdateSeatsRequest = function(req, res , next){
+    if(!req.body.seats){
+        let explanation = [];
+        explanation.push("seats not found in request body");
+        const appError = new AppError(explanation, StatusCodes.BAD_REQUEST);
+        ErrorResponse.error = appError; 
+        res.status(ErrorResponse.error.statusCode).send(ErrorResponse);
+    }
+    next();
+}
+
 module.exports = {
-    validateCreateRequest
+    validateCreateRequest,
+    validateUpdateSeatsRequest
 }

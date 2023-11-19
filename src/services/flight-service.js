@@ -130,6 +130,21 @@ class FlightService {
         }
     }
 
+    async updateSeats(data){
+        try {
+            const response = await flightRepository.updateSeats(data.flightId, data.seats, data.dec);
+            return response;    
+        } catch (error) {
+            if(error.statusCode == StatusCodes.NOT_FOUND){
+                throw error;
+            }
+            else{
+                const appError = new AppError("Internal Server error", StatusCodes.INTERNAL_SERVER_ERROR);
+                throw appError;
+            }
+        }
+        
+    }
 }
 
 module.exports = FlightService;

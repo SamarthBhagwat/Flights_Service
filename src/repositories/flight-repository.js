@@ -40,6 +40,18 @@ class FlightRepository extends BasicCRUDRepository{
         });
         return response
     }
+
+    async updateSeats(flightId, seats, dec = 1){
+        const flight = await this.findById(flightId);
+        if(parseInt(dec)){
+            await flight.decrement('totalSeats' , {by: seats});
+        }
+        else{
+            await flight.increment('totalSeats', {by: seats});
+        }
+        await flight.reload()
+        return flight;
+    }
 }
 
 module.exports = FlightRepository;
