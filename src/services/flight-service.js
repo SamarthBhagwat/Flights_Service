@@ -109,6 +109,27 @@ class FlightService {
         }
     }
 
+    async getFlight(id){
+        try {
+            const flight = await flightRepository.findById(id);
+            if(flight){
+                return flight;
+            }
+            else{
+                const appError = new AppError(`Flight with id ${id} not found` , StatusCodes.NOT_FOUND);
+                throw appError;
+            }   
+        } catch (error) {
+            if(error.statusCode == StatusCodes.NOT_FOUND){
+                throw error;
+            }
+            else{
+                const appError = new AppError("Internal Server error", StatusCodes.INTERNAL_SERVER_ERROR);
+                throw appError;
+            }
+        }
+    }
+
 }
 
 module.exports = FlightService;
