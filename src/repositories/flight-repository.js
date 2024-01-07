@@ -1,6 +1,7 @@
 const BasicCRUDRepository = require("./crud-repositories");
 const {Flight, Airport, Airplane, City} = require('../models');
 const db = require('../models');
+const { addRowLockOnFlights } = require('./queries')
 
 class FlightRepository extends BasicCRUDRepository{
     constructor(){
@@ -42,23 +43,34 @@ class FlightRepository extends BasicCRUDRepository{
         return response
     }
 
-    async updateSeats(flightId, seats, dec = 1){
+    async updateRemainingSeats(flightId, seats, dec = true){
+        const transaction = await db.sequelize.transaction();
         try {
-            const result = await db.sequelize.transaction(async() => {
-                const flight = await this.findById(flightId);
-                if(parseInt(dec)){
-                    await flight.decrement('totalSeats' , {by: seats});
-                }
-                else{
-                    await flight.increment('totalSeats', {by: seats});
-                }
-                await flight.reload()
-                return flight;
-            });
-            return result;    
+            // Adding a row-level lock on the flights, basically we are performing a raw query here and the raw query contains FOR UPDATE
+            // that applies a lock on the flights table 
+            await db.sequelize.query(addRowLockOnFlights(flightId));
+            
+            // Taking flight object because we can call increment or decrement functions on flight object only 
+            const flight = await Flight.findByPk(flightId);
+
+            // + operator attempts to convert the data into a number, 
+            // +0 = 0, +1 = 1, +true = 1, +false = 0
+            if(+dec){
+                await flight.decrement('totalSeats', {by: seats}, {transaction: transaction});
+            }
+            else{
+                await flight.increment('totalSeats', {by: seats}, {transaction: transaction});
+            }
+
+            // Updates the seat value in the single query 
+            await flight.reload();
+            await transaction.commit();
+            return flight;
         } catch (error) {
+            await transaction.rollback();
             throw error;
-        }    
+        }
+        
     }
 }
 

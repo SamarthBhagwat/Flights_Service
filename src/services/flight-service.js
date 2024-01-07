@@ -132,9 +132,10 @@ class FlightService {
 
     async updateSeats(data){
         try {
-            const response = await flightRepository.updateSeats(data.flightId, data.seats, data.dec);
+            const response = await flightRepository.updateRemainingSeats(data.flightId, data.seats, data.dec);
             return response;    
         } catch (error) {
+            console.log(error);
             if(error.statusCode == StatusCodes.NOT_FOUND){
                 throw error;
             }
